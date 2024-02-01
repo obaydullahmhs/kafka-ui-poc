@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redpanda-ui-config
+  namespace: demo
+data:
+  config.yaml: |
+    connect:
+      enabled: true
+      clusters:
+        - name: connect
+          url: http://connect-cluster.demo.svc.cluster.local:8083
+          tls:
+            enabled: false
+          username: connect
+          password: kw9Bu_Y4SwAVuIIg

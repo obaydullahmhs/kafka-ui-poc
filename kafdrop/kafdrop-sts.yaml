@@ -1,0 +1,54 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafdrop-ui
+  namespace: demo
+  labels:
+    app: kafdrop-ui
+spec:
+  ports:
+  - port: 9000
+    name: web
+  clusterIP: None
+  selector:
+    app: kafdrop-ui
+---
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: kafdrop-ui
+  namespace: demo
+spec:
+  selector:
+    matchLabels:
+      app: kafdrop-ui # has to match .spec.template.metadata.labels
+  serviceName: "kafdrop-ui"
+  template:
+    metadata:
+      labels:
+        app: kafdrop-ui # has to match .spec.selector.matchLabels
+    spec:
+      containers:
+      - name: kafdrop-ui
+        image: obsidiandynamics/kafdrop
+        ports:
+        - containerPort: 9000
+          name: web
+        env:
+        - name:  KAFKA_BROKERCONNECT
+          value: "kafka-prod-broker-0.kafka-prod-pods.demo.svc.cluster.local:9092,kafka-prod-broker-1.kafka-prod-pods.demo.svc.cluster.local:9092"
+        - name: KAFKA_PROPERTIES_FILE
+          value: /etc/kafka/kafka.properties
+        volumeMounts:
+        - name: basic
+          mountPath: /etc/kafka
+      volumes:
+      - name: basic
+        secret:
+          defaultMode: 420
+          items:
+          - key: kafka.properties
+            path: kafka.properties
+          secretName: kafdrop-secret
+
